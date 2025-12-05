@@ -446,12 +446,14 @@ body.light-mode .theme-toggle-slider {
 .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55); 
-    align-items: center;
-    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;               
+    justify-content: center;     
+    align-items: center;         
     z-index: 1000;
     backdrop-filter: blur(7px);
 }
+
 
 .modal-content {
     background: var(--bg-surface);

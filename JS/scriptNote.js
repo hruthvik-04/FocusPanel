@@ -1,238 +1,287 @@
 class NotesApp {
     constructor() {
-        // Basic app state
+        // basic state
         this.notes = [];
-        this.currentFilter = 'active';
-        this.editingNoteId = null;
+        this.currentFilter = "active"; // active | archived | deleted | all
+        this.editingId = null;
 
-        this.modal = null;
-        this.form = null;
+        // cache DOM references
+        this.modalEl = document.getElementById("noteModal");
+        this.formEl = document.getElementById("noteForm");
+        this.gridEl = document.getElementById("notesGrid");
+        this.emptyEl = document.getElementById("emptyState");
+        this.searchInputEl = document.getElementById("searchInput");
+        this.toastEl = document.getElementById("toast");
+        this.toastMsgEl = document.getElementById("toastMessage");
 
         this.init();
     }
 
     init() {
-        this.loadNotes();
-        this.setupModal();
+        this.loadFromStorage();
         this.bindEvents();
-        this.renderNotes();
+        this.render(); // initial render
     }
 
-    loadNotes() {
+    loadFromStorage() {
+        let raw;
         try {
-            const stored = localStorage.getItem('notes');
-            this.notes = stored ? JSON.parse(stored) : [];
-        } catch (error) {
-            console.error('Error loading notes:', error);
+            raw = localStorage.getItem("notes");
+            if (!raw) {
+                this.notes = [];
+                return;
+            }
+            const parsed = JSON.parse(raw);
+            this.notes = Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+            console.error("Error reading notes from localStorage", err);
             this.notes = [];
         }
     }
 
-    saveNotes() {
+    saveToStorage() {
         try {
-            localStorage.setItem('notes', JSON.stringify(this.notes));
-        } catch (error) {
-            console.error('Error saving notes:', error);
-            this.showToast('Error saving notes', 'error');
+            localStorage.setItem("notes", JSON.stringify(this.notes));
+        } catch (err) {
+            console.error("Error writing notes to localStorage", err);
+            this.showToast("Could not save notes", "error");
         }
-    }
-
-    setupModal() {
-        this.modal = document.getElementById('noteModal');
-        this.form = document.getElementById('noteForm');
     }
 
     bindEvents() {
-        document.getElementById('addNoteBtn')
-            .addEventListener('click', () => this.openModal());
+        const addBtn = document.getElementById("addNoteBtn");
+        const closeModalBtn = document.getElementById("closeModal");
+        const cancelBtn = document.getElementById("cancelBtn");
 
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.handleFilter(e));
-        });
-
-        document.getElementById('searchInput')
-            .addEventListener('input', (e) => this.handleSearch(e));
-
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-
-        document.getElementById('closeModal')
-            .addEventListener('click', () => this.closeModal());
-        document.getElementById('cancelBtn')
-            .addEventListener('click', () => this.closeModal());
-
-        this.modal.addEventListener('click', (e) => {
-            if (e.target.id === 'noteModal') {
-                this.closeModal();
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.closeModal();
-            }
-        });
-    }
-
-    handleFilter(e) {
-        document.querySelectorAll('.filter-btn')
-            .forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
-
-        this.currentFilter = e.target.dataset.filter;
-        this.renderNotes();
-    }
-
-    handleSearch(e) {
-        const searchTerm = e.target.value.toLowerCase().trim();
-        this.renderNotes(searchTerm);
-    }
-
-    openModal(noteId = null) {
-        this.editingNoteId = noteId;
-
-        if (noteId) {
-            const note = this.notes.find(n => n.id === noteId);
-            if (note) {
-                document.getElementById('modalTitle').textContent = 'Edit Note';
-                document.getElementById('noteTitle').value = note.title;
-                document.getElementById('noteContent').value = note.content;
-            }
-        } else {
-            document.getElementById('modalTitle').textContent = 'Create Note';
-            this.form.reset();
+        if (addBtn) {
+            addBtn.addEventListener("click", () => {
+                this.openModal();
+            });
         }
 
-        this.modal.classList.remove('hidden');
-        document.getElementById('noteTitle').focus();
+        if (this.formEl) {
+            this.formEl.addEventListener("submit", (e) => this.handleSubmit(e));
+        }
+
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", () => this.closeModal());
+        }
+        if (cancelBtn) {
+            cancelBtn.addEventListener("click", () => this.closeModal());
+        }
+
+        if (this.modalEl) {
+            this.modalEl.addEventListener("click", (e) => {
+                // close if clicked outside content
+                if (e.target === this.modalEl) {
+                    this.closeModal();
+                }
+            });
+        }
+
+        // ESC key to close modal
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                this.closeModal();
+            }
+        });
+
+        // filter buttons
+        const filterButtons = document.querySelectorAll(".filter-btn");
+        filterButtons.forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+                filterButtons.forEach((b) => b.classList.remove("active"));
+                e.currentTarget.classList.add("active");
+                const filter = e.currentTarget.dataset.filter || "active";
+                this.currentFilter = filter;
+                this.render();
+            });
+        });
+
+        // search
+        if (this.searchInputEl) {
+            this.searchInputEl.addEventListener("input", (e) => {
+                const term = e.target.value.toLowerCase().trim();
+                this.render(term);
+            });
+        }
+    }
+
+    openModal(id) {
+        this.editingId = id || null;
+
+        const titleInput = document.getElementById("noteTitle");
+        const contentInput = document.getElementById("noteContent");
+        const modalTitle = document.getElementById("modalTitle");
+
+        if (!this.modalEl || !titleInput || !contentInput || !modalTitle) return;
+
+        if (id) {
+            // edit mode
+            const note = this.notes.find((n) => n.id === id);
+            if (note) {
+                modalTitle.textContent = "Edit Note";
+                titleInput.value = note.title;
+                contentInput.value = note.content;
+            }
+        } else {
+            // create mode
+            modalTitle.textContent = "Create Note";
+            this.formEl && this.formEl.reset();
+        }
+
+        this.modalEl.classList.remove("hidden");
+        titleInput.focus();
     }
 
     closeModal() {
-        this.modal.classList.add('hidden');
-        this.form.reset();
-        this.editingNoteId = null;
+        if (!this.modalEl || !this.formEl) return;
+        this.modalEl.classList.add("hidden");
+        this.formEl.reset();
+        this.editingId = null;
     }
 
     handleSubmit(e) {
         e.preventDefault();
 
-        const title = document.getElementById('noteTitle').value.trim();
-        const content = document.getElementById('noteContent').value.trim();
+        const titleInput = document.getElementById("noteTitle");
+        const contentInput = document.getElementById("noteContent");
+
+        if (!titleInput || !contentInput) return;
+
+        const title = titleInput.value.trim();
+        const content = contentInput.value.trim();
 
         if (!title || !content) {
-            this.showToast('Please fill in all fields', 'error');
+            this.showToast("Please fill in both title and content", "error");
             return;
         }
 
-        if (this.editingNoteId) {
-            this.updateNote(this.editingNoteId, title, content);
+        if (this.editingId) {
+            this.updateNote(this.editingId, title, content);
         } else {
-            this.createNote(title, content);
+            this.addNote(title, content);
         }
 
         this.closeModal();
     }
 
-    // Core CRUD logic for notes
-    createNote(title, content) {
-        const newNote = {
+    addNote(title, content) {
+        const note = {
             id: Date.now().toString(),
-            title,
-            content,
+            title: title,
+            content: content,
             createdAt: new Date().toISOString(),
-            status: 'active'
+            status: "active" // active | archived | deleted
         };
 
-        this.notes.unshift(newNote);
-        this.saveNotes();
-        this.renderNotes();
-        this.showToast('Note created successfully!');
+        // add to the beginning
+        this.notes.unshift(note);
+        this.saveToStorage();
+        this.render();
+        this.showToast("Note created");
     }
 
     updateNote(id, title, content) {
-        const noteIndex = this.notes.findIndex(n => n.id === id);
-        if (noteIndex !== -1) {
-            this.notes[noteIndex] = {
-                ...this.notes[noteIndex],
-                title,
-                content
-            };
-            this.saveNotes();
-            this.renderNotes();
-            this.showToast('Note updated successfully!');
-        }
+        const idx = this.notes.findIndex((n) => n.id === id);
+        if (idx === -1) return;
+
+        this.notes[idx] = {
+            ...this.notes[idx],
+            title,
+            content
+        };
+
+        this.saveToStorage();
+        this.render();
+        this.showToast("Note updated");
     }
 
     deleteNote(id) {
-        const note = this.notes.find(n => n.id === id);
-        if (note && note.status !== 'deleted') {
-            note.status = 'deleted';
-            this.saveNotes();
-            this.renderNotes();
-            this.showToast('Note moved to trash');
-        }
+        const note = this.notes.find((n) => n.id === id);
+        if (!note || note.status === "deleted") return;
+
+        note.status = "deleted";
+        this.saveToStorage();
+        this.render();
+        this.showToast("Note moved to trash");
     }
 
     archiveNote(id) {
-        const note = this.notes.find(n => n.id === id);
-        if (note && note.status !== 'deleted') {
-            note.status = note.status === 'archived' ? 'active' : 'archived';
-            this.saveNotes();
-            this.renderNotes();
-            const message = note.status === 'archived'
-                ? 'Note archived'
-                : 'Note unarchived';
-            this.showToast(message);
+        const note = this.notes.find((n) => n.id === id);
+        if (!note || note.status === "deleted") return;
+
+        if (note.status === "archived") {
+            note.status = "active";
+            this.showToast("Note unarchived");
+        } else {
+            note.status = "archived";
+            this.showToast("Note archived");
         }
+
+        this.saveToStorage();
+        this.render();
     }
 
     restoreNote(id) {
-        const note = this.notes.find(n => n.id === id);
-        if (note && note.status === 'deleted') {
-            note.status = 'active';
-            this.saveNotes();
-            this.renderNotes();
-            this.showToast('Note restored successfully!');
-        }
+        const note = this.notes.find((n) => n.id === id);
+        if (!note || note.status !== "deleted") return;
+
+        note.status = "active";
+        this.saveToStorage();
+        this.render();
+        this.showToast("Note restored");
     }
 
-    renderNotes(searchTerm = '') {
-        const grid = document.getElementById('notesGrid');
-        const emptyState = document.getElementById('emptyState');
+    getFilteredNotes(searchTerm) {
+        const term = (searchTerm || "").toLowerCase();
 
-        const filteredNotes = this.notes.filter(note => {
-            const matchesFilter =
-                this.currentFilter === 'all' || note.status === this.currentFilter;
+        return this.notes.filter((note) => {
+            // filter by status
+            let statusMatch = true;
+            if (this.currentFilter !== "all") {
+                statusMatch = note.status === this.currentFilter;
+            }
 
-            const matchesSearch =
-                searchTerm === '' ||
-                note.title.toLowerCase().includes(searchTerm) ||
-                note.content.toLowerCase().includes(searchTerm);
+            // filter by search
+            let searchMatch = true;
+            if (term) {
+                const inTitle = note.title.toLowerCase().includes(term);
+                const inContent = note.content.toLowerCase().includes(term);
+                searchMatch = inTitle || inContent;
+            }
 
-            return matchesFilter && matchesSearch;
+            return statusMatch && searchMatch;
         });
-
-        grid.innerHTML = '';
-
-        if (filteredNotes.length === 0) {
-            grid.classList.add('hidden');
-            emptyState.classList.remove('hidden');
-            emptyState.innerHTML = this.getEmptyStateContent();
-        } else {
-            grid.classList.remove('hidden');
-            emptyState.classList.add('hidden');
-
-            filteredNotes.forEach(note => {
-                const card = this.createNoteCard(note);
-                grid.appendChild(card);
-            });
-        }
     }
 
-    createNoteCard(note) {
-        const card = document.createElement('div');
-        card.className = `note-card ${note.status}`;
+    render(searchTerm) {
+        if (!this.gridEl || !this.emptyEl) return;
 
-        card.innerHTML = `
+        const list = this.getFilteredNotes(searchTerm);
+        this.gridEl.innerHTML = "";
+
+        if (!list.length) {
+            this.gridEl.classList.add("hidden");
+            this.emptyEl.classList.remove("hidden");
+            this.emptyEl.innerHTML = this.getEmptyStateMarkup();
+            return;
+        }
+
+        this.gridEl.classList.remove("hidden");
+        this.emptyEl.classList.add("hidden");
+
+        list.forEach((note) => {
+            const card = this.createCard(note);
+            this.gridEl.appendChild(card);
+        });
+    }
+
+    createCard(note) {
+        const div = document.createElement("div");
+        div.className = "note-card " + note.status;
+
+        div.innerHTML = `
             <div class="note-header">
                 <h3 class="note-title">${this.escapeHtml(note.title)}</h3>
                 <div class="note-date">
@@ -244,137 +293,146 @@ class NotesApp {
                 ${this.escapeHtml(note.content)}
             </div>
             <div class="note-actions">
-                ${this.getActionButtons(note)}
+                ${this.getActionsMarkup(note)}
             </div>
         `;
 
-        return card;
+        return div;
     }
 
-    getActionButtons(note) {
-        if (note.status === 'deleted') {
+    getActionsMarkup(note) {
+        if (note.status === "deleted") {
             return `
-                <button class="action-btn restore-btn" onclick="app.restoreNote('${note.id}')">
+                <button class="action-btn restore-btn" onclick="notesApp.restoreNote('${note.id}')">
                     <i class="fas fa-undo"></i>
                     Restore
                 </button>
             `;
         }
 
-        const archiveIcon = note.status === 'archived'
-            ? 'fa-solid fa-box-open'
-            : 'fa-solid fa-archive';
-        const archiveText = note.status === 'archived'
-            ? 'Unarchive'
-            : 'Archive';
+        const isArchived = note.status === "archived";
+        const archiveIcon = isArchived ? "fa-solid fa-box-open" : "fa-solid fa-archive";
+        const archiveText = isArchived ? "Unarchive" : "Archive";
 
         return `
-            <button class="action-btn edit-btn" onclick="app.openModal('${note.id}')">
+            <button class="action-btn edit-btn" onclick="notesApp.openModal('${note.id}')">
                 <i class="fas fa-pen"></i>
                 Edit
             </button>
-            <button class="action-btn archive-btn" onclick="app.archiveNote('${note.id}')">
+            <button class="action-btn archive-btn" onclick="notesApp.archiveNote('${note.id}')">
                 <i class="${archiveIcon}"></i>
                 ${archiveText}
             </button>
-            <button class="action-btn delete-btn" onclick="app.deleteNote('${note.id}')">
+            <button class="action-btn delete-btn" onclick="notesApp.deleteNote('${note.id}')">
                 <i class="fas fa-trash"></i>
                 Delete
             </button>
         `;
     }
 
-    getEmptyStateContent() {
-        const messages = {
+    getEmptyStateMarkup() {
+        const config = {
             active: {
-                icon: 'fa-sticky-note',
-                title: 'No active notes',
-                desc: 'Create your first note to get started'
+                icon: "fa-sticky-note",
+                title: "No active notes",
+                text: "Create a new note to get started."
             },
             archived: {
-                icon: 'fa-archive',
-                title: 'No archived notes',
-                desc: 'Archive some notes to see them here'
+                icon: "fa-archive",
+                title: "No archived notes",
+                text: "Archive a note to see it here."
             },
             deleted: {
-                icon: 'fa-trash',
-                title: 'No deleted notes',
-                desc: 'Deleted notes will appear here'
+                icon: "fa-trash",
+                title: "No deleted notes",
+                text: "Deleted notes will appear here."
             },
             all: {
-                icon: 'fa-sticky-note',
-                title: 'No notes found',
-                desc: 'Create your first note to get started'
+                icon: "fa-sticky-note",
+                title: "No notes found",
+                text: "Try changing filters or create a new note."
             }
         };
 
-        const message = messages[this.currentFilter] || messages.all;
+        const state = config[this.currentFilter] || config.all;
 
         return `
-            <i class="fas ${message.icon} empty-icon"></i>
-            <h3>${message.title}</h3>
-            <p>${message.desc}</p>
+            <i class="fas ${state.icon} empty-icon"></i>
+            <h3>${state.title}</h3>
+            <p>${state.text}</p>
         `;
     }
 
-    // Small helper utilities
-    formatDate(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffTime = Math.abs(now - date);
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    formatDate(isoString) {
+        if (!isoString) return "";
 
-        if (diffDays === 0) {
-            const hours = Math.floor(diffTime / (1000 * 60 * 60));
-            if (hours === 0) {
-                const minutes = Math.floor(diffTime / (1000 * 60));
-                if (minutes <= 1) return 'Just now';
-                return `${minutes} minutes ago`;
-            }
-            return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
-        } else if (diffDays === 1) {
-            return 'Yesterday';
-        } else if (diffDays < 7) {
-            return `${diffDays} days ago`;
-        } else {
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
+        const date = new Date(isoString);
+        const now = new Date();
+        const diffMs = now - date;
+
+        if (isNaN(diffMs)) {
+            return date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric"
             });
         }
+
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            if (diffHours <= 0) {
+                const diffMins = Math.floor(diffMs / (1000 * 60));
+                if (diffMins <= 1) return "Just now";
+                return diffMins + " minutes ago";
+            }
+            return diffHours === 1 ? "1 hour ago" : diffHours + " hours ago";
+        }
+
+        if (diffDays === 1) return "Yesterday";
+        if (diffDays < 7) return diffDays + " days ago";
+
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
     }
 
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
+    escapeHtml(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
         return div.innerHTML;
     }
 
-    showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
+    showToast(message, type) {
+        if (!this.toastEl || !this.toastMsgEl) return;
 
-        toastMessage.textContent = message;
-        toast.className = `toast ${type}`;
-        toast.classList.remove('hidden');
+        this.toastMsgEl.textContent = message || "";
+        // type can be "success" or "error" etc.
+        this.toastEl.className = "toast " + (type || "success");
+        this.toastEl.classList.remove("hidden");
 
         setTimeout(() => {
-            toast.classList.add('hidden');
+            this.toastEl.classList.add("hidden");
         }, 3000);
     }
 }
 
-// Boot up the app and theme toggle
-const app = new NotesApp();
+// expose single instance globally so inline onclick works
+window.notesApp = new NotesApp();
 
-const themeToggle = document.getElementById('themeToggle');
-const body = document.body;
+// theme toggle
+const themeToggle = document.getElementById("themeToggle");
+const bodyEl = document.body;
 
-body.classList.add('light-mode');
+if (bodyEl && themeToggle) {
+    bodyEl.classList.add("light-mode");
 
-themeToggle.addEventListener('click', () => {
-    body.classList.toggle('dark-mode');
-    body.classList.toggle('light-mode');
-    themeToggle.classList.toggle('active');
-});
+    themeToggle.addEventListener("click", () => {
+        bodyEl.classList.toggle("dark-mode");
+        bodyEl.classList.toggle("light-mode");
+        themeToggle.classList.toggle("active");
+    });
+}
