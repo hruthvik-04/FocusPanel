@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+    <title>Notes App | Radware - Task 1</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../CSS/StyleNote.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- App Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <i class="fas fa-sticky-note"></i>
+                    FocuZ Note
+                </h1>
+                <p class="app-subtitle">A simple and organized way to keep your notes and be in track </p>
+            </div>
+        </header>
+
+        <!-- Controls for Search, Filters, Add Button -->
+        <section class="controls-section">
+
+           
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                    type="text"
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="Search notes..."
+                />
+            </div>
+
+            <!-- Filters -->
+            <div class="filter-container">
+                <button class="filter-btn active" data-filter="active">
+                    <i class="fas fa-file-alt"></i> Active
+                </button>
+                <button class="filter-btn" data-filter="archived">
+                    <i class="fas fa-archive"></i> Archived
+                </button>
+                <button class="filter-btn" data-filter="deleted">
+                    <i class="fas fa-trash"></i> Deleted
+                </button>
+                <button class="filter-btn" data-filter="all">
+                    <i class="fas fa-list"></i> All
+                </button>
+            </div>
+
+           
+            <button id="addNoteBtn" class="add-note-btn">
+                <i class="fas fa-plus"></i> New Note
+            </button>
+        </section>
+
+
+        <main id="notesGrid" class="notes-grid"></main>
+
+        <div id="emptyState" class="empty-state hidden">
+            <i class="fas fa-sticky-note empty-icon"></i>
+            <h3>No Notes Yet</h3>
+            <p>Create a note to get started.</p>
+        </div>
+
+    </div>
+
+
+    <div id="noteModal" class="modal hidden">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h2 id="modalTitle">Create Note</h2>
+                <button id="closeModal" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="noteForm" class="note-form">
+                <div class="form-group">
+                    <label for="noteTitle">Title</label>
+                    <input 
+                        id="noteTitle"
+                        type="text"
+                        class="form-input"
+                        placeholder="Enter title..."
+                        maxlength="100"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="noteContent">Content</label>
+                    <textarea 
+                        id="noteContent"
+                        class="form-textarea"
+                        placeholder="Write your note..."
+                        rows="6"
+                        maxlength="1000"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Saved</span>
+    </div>
+
+    <script src="../JS/ScriptNote.js" defer></script>
+
+</body>
+</html>
