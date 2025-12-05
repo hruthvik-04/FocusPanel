@@ -1,20 +1,16 @@
-// ===== Notes App - Clean JavaScript Implementation =====
-
 class NotesApp {
     constructor() {
-        // All notes are stored here (and in localStorage)
+        // Basic app state
         this.notes = [];
-        this.currentFilter = 'active';    // active | archived | deleted | all
-        this.editingNoteId = null;        // which note is currently being edited
+        this.currentFilter = 'active';
+        this.editingNoteId = null;
 
-        // DOM-related setup
         this.modal = null;
         this.form = null;
 
         this.init();
     }
 
-    // ===== Initialize App =====
     init() {
         this.loadNotes();
         this.setupModal();
@@ -22,7 +18,6 @@ class NotesApp {
         this.renderNotes();
     }
 
-    // ===== LocalStorage Operations =====
     loadNotes() {
         try {
             const stored = localStorage.getItem('notes');
@@ -42,44 +37,35 @@ class NotesApp {
         }
     }
 
-    // ===== Modal Setup =====
     setupModal() {
         this.modal = document.getElementById('noteModal');
         this.form = document.getElementById('noteForm');
     }
 
-    // ===== Event Bindings =====
     bindEvents() {
-        // Add note button → open modal in "create" mode
         document.getElementById('addNoteBtn')
             .addEventListener('click', () => this.openModal());
 
-        // Filter buttons
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.handleFilter(e));
         });
 
-        // Search input
         document.getElementById('searchInput')
             .addEventListener('input', (e) => this.handleSearch(e));
 
-        // Form submission
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
-        // Modal close buttons
         document.getElementById('closeModal')
             .addEventListener('click', () => this.closeModal());
         document.getElementById('cancelBtn')
             .addEventListener('click', () => this.closeModal());
 
-        // Close modal when clicking outside content
         this.modal.addEventListener('click', (e) => {
             if (e.target.id === 'noteModal') {
                 this.closeModal();
             }
         });
 
-        // Escape key to close modal
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.closeModal();
@@ -87,7 +73,6 @@ class NotesApp {
         });
     }
 
-    // ===== Filter Handling =====
     handleFilter(e) {
         document.querySelectorAll('.filter-btn')
             .forEach(btn => btn.classList.remove('active'));
@@ -97,18 +82,15 @@ class NotesApp {
         this.renderNotes();
     }
 
-    // ===== Search Handling =====
     handleSearch(e) {
         const searchTerm = e.target.value.toLowerCase().trim();
         this.renderNotes(searchTerm);
     }
 
-    // ===== Modal Open / Close =====
     openModal(noteId = null) {
         this.editingNoteId = noteId;
 
         if (noteId) {
-            // Edit mode
             const note = this.notes.find(n => n.id === noteId);
             if (note) {
                 document.getElementById('modalTitle').textContent = 'Edit Note';
@@ -116,7 +98,6 @@ class NotesApp {
                 document.getElementById('noteContent').value = note.content;
             }
         } else {
-            // Create mode
             document.getElementById('modalTitle').textContent = 'Create Note';
             this.form.reset();
         }
@@ -131,7 +112,6 @@ class NotesApp {
         this.editingNoteId = null;
     }
 
-    // ===== Form Submission =====
     handleSubmit(e) {
         e.preventDefault();
 
@@ -152,14 +132,14 @@ class NotesApp {
         this.closeModal();
     }
 
-    // ===== Note CRUD Operations =====
+    // Core CRUD logic for notes
     createNote(title, content) {
         const newNote = {
-            id: Date.now().toString(),         // simple unique id
+            id: Date.now().toString(),
             title,
             content,
             createdAt: new Date().toISOString(),
-            status: 'active'                   // active by default
+            status: 'active'
         };
 
         this.notes.unshift(newNote);
@@ -182,7 +162,6 @@ class NotesApp {
         }
     }
 
-    // Soft delete → move to "deleted" status
     deleteNote(id) {
         const note = this.notes.find(n => n.id === id);
         if (note && note.status !== 'deleted') {
@@ -193,7 +172,6 @@ class NotesApp {
         }
     }
 
-    // Archive / Unarchive
     archiveNote(id) {
         const note = this.notes.find(n => n.id === id);
         if (note && note.status !== 'deleted') {
@@ -207,7 +185,6 @@ class NotesApp {
         }
     }
 
-    // Restore from deleted → active
     restoreNote(id) {
         const note = this.notes.find(n => n.id === id);
         if (note && note.status === 'deleted') {
@@ -218,12 +195,10 @@ class NotesApp {
         }
     }
 
-    // ===== Note Rendering =====
     renderNotes(searchTerm = '') {
         const grid = document.getElementById('notesGrid');
         const emptyState = document.getElementById('emptyState');
 
-        // Filter notes based on current filter and search
         const filteredNotes = this.notes.filter(note => {
             const matchesFilter =
                 this.currentFilter === 'all' || note.status === this.currentFilter;
@@ -277,7 +252,6 @@ class NotesApp {
     }
 
     getActionButtons(note) {
-        // Deleted → only restore
         if (note.status === 'deleted') {
             return `
                 <button class="action-btn restore-btn" onclick="app.restoreNote('${note.id}')">
@@ -287,7 +261,6 @@ class NotesApp {
             `;
         }
 
-        // Active / Archived → Edit + Archive/Unarchive + Delete
         const archiveIcon = note.status === 'archived'
             ? 'fa-solid fa-box-open'
             : 'fa-solid fa-archive';
@@ -343,8 +316,8 @@ class NotesApp {
             <p>${message.desc}</p>
         `;
     }
-     
-    // ===== Utility Functions =====
+
+    // Small helper utilities
     formatDate(dateString) {
         const date = new Date(dateString);
         const now = new Date();
@@ -392,13 +365,12 @@ class NotesApp {
     }
 }
 
-// ===== Initialize App and expose globally for onclick handlers =====
+// Boot up the app and theme toggle
 const app = new NotesApp();
 
 const themeToggle = document.getElementById('themeToggle');
 const body = document.body;
 
-// default theme
 body.classList.add('light-mode');
 
 themeToggle.addEventListener('click', () => {
