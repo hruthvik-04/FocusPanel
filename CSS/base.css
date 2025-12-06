@@ -171,20 +171,25 @@
         }
 
   
-        .hero {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4rem 4rem 2rem 4rem;
-            min-height: calc(100vh - 100px);
-            position: relative;
-        }
+     .hero {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6rem 4rem;
+    min-height: calc(100vh - 100px);
+    overflow: hidden;
+}
 
-        .hero-content {
+      /*  .hero-content {
             flex: 1;
             max-width: 650px;
-        }
-
+             z-index: 1;
+        }*/
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
         .hero-title {
             font-size: 5rem;
             font-weight: 700;
@@ -240,13 +245,18 @@
         }
 
       
-        .hero-visual {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
+        .hero-bg {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none; 
+        z-index: 0;
+        opacity: 1; 
+        filter: blur(3px);
+        transform: scale(1.1);
+    }
 
         .cube-container {
             width: 400px;
@@ -402,7 +412,7 @@
     opacity: 0.8;
     color: var(--text-muted);
 }
-/* Parent container for cards */
+
 .app-section {
     display: flex;
     justify-content: center;
@@ -431,13 +441,6 @@
 }
 
 
-.app-img {
-    max-width: 100%;
-    height: 700px;
-    border-radius: 14px;
-    object-fit: cover;
-    margin-bottom: 16px;
-}
 
 
 .app-title {
@@ -471,7 +474,6 @@ body.dark-mode .app-card {
 
 
 
-/* Card content */
 .app-img {
     width: 300px;
     height: 200px;
@@ -494,7 +496,7 @@ body.dark-mode .app-card {
     margin-bottom: 18px;
 }
 
-/* Button inside card */
+
 .app-btn {
     background: #c4b5fd;
     color:#c4b5fd , #a78bfa;

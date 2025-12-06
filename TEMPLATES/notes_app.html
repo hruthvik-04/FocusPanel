@@ -7,7 +7,7 @@
   <title>Notes App | Radware - Task 1</title>
 
   <!-- Styles -->
-  <link rel="stylesheet" href="../CSS/StyleNote.css"/>
+  <link rel="stylesheet" href="../CSS/Note/StyleNote.css"/>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 
@@ -21,14 +21,21 @@
 
 <body>
 
-    <div class="container">
-
-     <header class="header">
-    <div class="header-content">
+        <div class="container">
+            <div class="top-bar">
+        <div class="top-logo">
+            <i class="fas fa-sticky-note"></i>
+            <span>FocuZ Note</span>
+        </div>
 
         <div class="theme-toggle" id="themeToggle">
             <div class="theme-toggle-slider"></div>
         </div>
+    </div>
+     <header class="header">
+    <div class="header-content">
+
+       
 
         <h1 class="app-title">
             <i class="fas fa-sticky-note"></i>
@@ -79,19 +86,24 @@
 
         <main id="notesGrid" class="notes-grid"></main>
 
-        <div id="emptyState" class="empty-state hidden">
-            <dotlottie-player
-                src="../assets/animations/man-task.lottie"
-                background="transparent"
-                speed="1"
-                style="width: 220px; height: 220px; margin-bottom: 12px;"
-                loop
-                autoplay>
-            </dotlottie-player>
+<div id="emptyState" class="empty-state hidden">
+  <!-- Lottie animation only -->
+  <dotlottie-player
+    class="empty-animation"
+    src="../assets/animations/man-task.lottie"
+    background="transparent"
+    speed="1"
+    style="width: 260px; height: 260px; margin-bottom: 18px;"
+    loop
+    autoplay>
+  </dotlottie-player>
 
-            <h3>No active notes</h3>
-            <p>Create your first note to get started</p>
-            </div>
+  
+  <h3 id="emptyStateTitle">No active notes</h3>
+  <p id="emptyStateText">Create a new note to get started.</p>
+</div>
+
+
 
 
 

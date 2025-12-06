@@ -1,6 +1,5 @@
 class NotesApp {
     constructor() {
-        // basic state
         this.notes = [];
         this.currentFilter = "active"; // active | archived | deleted | all
         this.editingId = null;
@@ -255,6 +254,7 @@ class NotesApp {
         });
     }
 
+    // 🔹 UPDATED: keep Lottie, only update text/icon
     render(searchTerm) {
         if (!this.gridEl || !this.emptyEl) return;
 
@@ -264,7 +264,9 @@ class NotesApp {
         if (!list.length) {
             this.gridEl.classList.add("hidden");
             this.emptyEl.classList.remove("hidden");
-            this.emptyEl.innerHTML = this.getEmptyStateMarkup();
+
+            // DO NOT touch emptyEl.innerHTML → preserves <dotlottie-player>
+            this.updateEmptyStateContent();
             return;
         }
 
@@ -330,38 +332,41 @@ class NotesApp {
         `;
     }
 
-    getEmptyStateMarkup() {
-        const config = {
-            active: {
-                icon: "fa-sticky-note",
-                title: "No active notes",
-                text: "Create a new note to get started."
-            },
-            archived: {
-                icon: "fa-archive",
-                title: "No archived notes",
-                text: "Archive a note to see it here."
-            },
-            deleted: {
-                icon: "fa-trash",
-                title: "No deleted notes",
-                text: "Deleted notes will appear here."
-            },
-            all: {
-                icon: "fa-sticky-note",
-                title: "No notes found",
-                text: "Try changing filters or create a new note."
-            }
-        };
+ getEmptyStateConfig() {
+    const config = {
+        active: {
+            title: "No active notes",
+            text: "Create a new note to get started."
+        },
+        archived: {
+            title: "No archived notes",
+            text: "Archive a note to see it here."
+        },
+        deleted: {
+            title: "No deleted notes",
+            text: "Deleted notes will appear here."
+        },
+        all: {
+            title: "No notes found",
+            text: "Try changing filters or create a new note."
+        }
+    };
 
-        const state = config[this.currentFilter] || config.all;
+    return config[this.currentFilter] || config.all;
+}
 
-        return `
-            <i class="fas ${state.icon} empty-icon"></i>
-            <h3>${state.title}</h3>
-            <p>${state.text}</p>
-        `;
-    }
+
+  updateEmptyStateContent() {
+    const state = this.getEmptyStateConfig();
+
+    const titleEl = document.getElementById("emptyStateTitle");
+    const textEl = document.getElementById("emptyStateText");
+
+    if (!titleEl || !textEl) return;
+
+    titleEl.textContent = state.title;
+    textEl.textContent = state.text;
+}
 
     formatDate(isoString) {
         if (!isoString) return "";
@@ -387,7 +392,7 @@ class NotesApp {
                 if (diffMins <= 1) return "Just now";
                 return diffMins + " minutes ago";
             }
-            return diffHours === 1 ? "1 hour ago" : diffHours + " hours ago";
+            return diffHours === 1 ? "1 hour ago" : diffHours + "hours ago";
         }
 
         if (diffDays === 1) return "Yesterday";
