@@ -65,13 +65,26 @@
 
         <main id="notesGrid" class="notes-grid"></main>
 
-        <div id="emptyState" class="empty-state hidden">
-            <i class="fas fa-sticky-note empty-icon"></i>
-            <h3>No Notes Yet</h3>
-            <p>Create a note to get started.</p>
-        </div>
+<div id="emptyState" class="empty-state hidden">
+  <!-- Lottie animation only -->
+  <dotlottie-player
+    class="empty-animation"
+    src="../assets/animations/man-task.lottie"
+    background="transparent"
+    speed="1"
+    style="width: 260px; height: 260px; margin-bottom: 18px;"
+    loop
+    autoplay>
+  </dotlottie-player>
 
-    </div>
+  
+  <h3 id="emptyStateTitle">No active notes</h3>
+  <p id="emptyStateText">Create a new note to get started.</p>
+</div>
+
+
+
+
 
 
     <div id="noteModal" class="modal hidden">
