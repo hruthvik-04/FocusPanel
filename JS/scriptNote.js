@@ -1,261 +1,178 @@
+
+
 class NotesApp {
+    notes = [];
+    currentFilter = "active";
+    editingId = null;
+
+    modalEl = document.getElementById("noteModal");
+    formEl = document.getElementById("noteForm");
+    gridEl = document.getElementById("notesGrid");
+    emptyEl = document.getElementById("emptyState");
+    searchInputEl = document.getElementById("searchInput");
+    toastEl = document.getElementById("toast");
+    toastMsgEl = document.getElementById("toastMessage");
+
     constructor() {
-        this.notes = [];
-        this.currentFilter = "active"; // active | archived | deleted | all
-        this.editingId = null;
-
-        // cache DOM references
-        this.modalEl = document.getElementById("noteModal");
-        this.formEl = document.getElementById("noteForm");
-        this.gridEl = document.getElementById("notesGrid");
-        this.emptyEl = document.getElementById("emptyState");
-        this.searchInputEl = document.getElementById("searchInput");
-        this.toastEl = document.getElementById("toast");
-        this.toastMsgEl = document.getElementById("toastMessage");
-
         this.init();
     }
 
-    init() {
+    init = () => {
         this.loadFromStorage();
         this.bindEvents();
-        this.render(); // initial render
-    }
+        this.render();
+    };
 
-    loadFromStorage() {
-        let raw;
+    loadFromStorage = () => {
         try {
-            raw = localStorage.getItem("notes");
-            if (!raw) {
-                this.notes = [];
-                return;
-            }
-            const parsed = JSON.parse(raw);
-            this.notes = Array.isArray(parsed) ? parsed : [];
-        } catch (err) {
-            console.error("Error reading notes from localStorage", err);
+            const stored = JSON.parse(localStorage.getItem("notes"));
+            this.notes = Array.isArray(stored) ? stored : [];
+        } catch {
             this.notes = [];
         }
-    }
+    };
 
-    saveToStorage() {
+    saveToStorage = () => {
         try {
             localStorage.setItem("notes", JSON.stringify(this.notes));
-        } catch (err) {
-            console.error("Error writing notes to localStorage", err);
-            this.showToast("Could not save notes", "error");
+        } catch {
+            this.showToast("Storage write failed", "error");
         }
-    }
+    };
 
-    bindEvents() {
-        const addBtn = document.getElementById("addNoteBtn");
-        const closeModalBtn = document.getElementById("closeModal");
-        const cancelBtn = document.getElementById("cancelBtn");
+    bindEvents = () => {
+        document.getElementById("addNoteBtn")?.addEventListener("click", () => this.openModal());
+        document.getElementById("closeModal")?.addEventListener("click", this.closeModal);
+        document.getElementById("cancelBtn")?.addEventListener("click", this.closeModal);
 
-        if (addBtn) {
-            addBtn.addEventListener("click", () => {
-                this.openModal();
-            });
-        }
+        this.formEl?.addEventListener("submit", this.handleSubmit);
 
-        if (this.formEl) {
-            this.formEl.addEventListener("submit", (e) => this.handleSubmit(e));
-        }
+        this.modalEl?.addEventListener("click", e => e.target === this.modalEl && this.closeModal());
 
-        if (closeModalBtn) {
-            closeModalBtn.addEventListener("click", () => this.closeModal());
-        }
-        if (cancelBtn) {
-            cancelBtn.addEventListener("click", () => this.closeModal());
-        }
+        document.addEventListener("keydown", e => e.key === "Escape" && this.closeModal());
 
-        if (this.modalEl) {
-            this.modalEl.addEventListener("click", (e) => {
-                // close if clicked outside content
-                if (e.target === this.modalEl) {
-                    this.closeModal();
-                }
-            });
-        }
-
-        // ESC key to close modal
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") {
-                this.closeModal();
-            }
-        });
-
-        // filter buttons
-        const filterButtons = document.querySelectorAll(".filter-btn");
-        filterButtons.forEach((btn) => {
-            btn.addEventListener("click", (e) => {
-                filterButtons.forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".filter-btn").forEach(btn =>
+            btn.addEventListener("click", e => {
+                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
                 e.currentTarget.classList.add("active");
-                const filter = e.currentTarget.dataset.filter || "active";
-                this.currentFilter = filter;
+                this.currentFilter = e.currentTarget.dataset.filter ?? "active";
                 this.render();
-            });
-        });
+            })
+        );
 
-        // search
-        if (this.searchInputEl) {
-            this.searchInputEl.addEventListener("input", (e) => {
-                const term = e.target.value.toLowerCase().trim();
-                this.render(term);
-            });
-        }
-    }
+        this.searchInputEl?.addEventListener("input", this.debounce(e => {
+            this.render(e.target.value.toLowerCase().trim());
+        }, 250));
+    };
 
-    openModal(id) {
-        this.editingId = id || null;
+    debounce = (fn, delay) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), delay);
+        };
+    };
 
-        const titleInput = document.getElementById("noteTitle");
-        const contentInput = document.getElementById("noteContent");
+    openModal = (id = null) => {
+        this.editingId = id;
+
+        const titleEl = document.getElementById("noteTitle");
+        const contentEl = document.getElementById("noteContent");
         const modalTitle = document.getElementById("modalTitle");
 
-        if (!this.modalEl || !titleInput || !contentInput || !modalTitle) return;
-
         if (id) {
-            // edit mode
-            const note = this.notes.find((n) => n.id === id);
-            if (note) {
-                modalTitle.textContent = "Edit Note";
-                titleInput.value = note.title;
-                contentInput.value = note.content;
-            }
+            const note = this.notes.find(n => n.id === id);
+            modalTitle.textContent = "Edit Note";
+            titleEl.value = note?.title || "";
+            contentEl.value = note?.content || "";
         } else {
-            // create mode
             modalTitle.textContent = "Create Note";
-            this.formEl && this.formEl.reset();
+            this.formEl?.reset();
         }
 
-        this.modalEl.classList.remove("hidden");
-        titleInput.focus();
-    }
+        this.modalEl?.classList.remove("hidden");
+        titleEl.focus();
+    };
 
-    closeModal() {
-        if (!this.modalEl || !this.formEl) return;
-        this.modalEl.classList.add("hidden");
-        this.formEl.reset();
+    closeModal = () => {
+        this.modalEl?.classList.add("hidden");
+        this.formEl?.reset();
         this.editingId = null;
-    }
+    };
 
-    handleSubmit(e) {
+    handleSubmit = e => {
         e.preventDefault();
+        const title = document.getElementById("noteTitle")?.value.trim();
+        const content = document.getElementById("noteContent")?.value.trim();
 
-        const titleInput = document.getElementById("noteTitle");
-        const contentInput = document.getElementById("noteContent");
+        if (!title || !content) return this.showToast("Title and content required", "error");
 
-        if (!titleInput || !contentInput) return;
-
-        const title = titleInput.value.trim();
-        const content = contentInput.value.trim();
-
-        if (!title || !content) {
-            this.showToast("Please fill in both title and content", "error");
-            return;
-        }
-
-        if (this.editingId) {
-            this.updateNote(this.editingId, title, content);
-        } else {
-            this.addNote(title, content);
-        }
-
+        this.editingId ? this.updateNote(this.editingId, title, content) : this.addNote(title, content);
         this.closeModal();
-    }
+    };
 
-    addNote(title, content) {
+    addNote = (title, content) => {
         const note = {
             id: Date.now().toString(),
-            title: title,
-            content: content,
+            title,
+            content,
             createdAt: new Date().toISOString(),
-            status: "active" // active | archived | deleted
+            status: "active"
         };
 
-        // add to the beginning
         this.notes.unshift(note);
         this.saveToStorage();
         this.render();
-        this.showToast("Note created");
-    }
+        this.showToast("Note added");
+    };
 
-    updateNote(id, title, content) {
-        const idx = this.notes.findIndex((n) => n.id === id);
-        if (idx === -1) return;
+    updateNote = (id, title, content) => {
+        const index = this.notes.findIndex(n => n.id === id);
+        if (index === -1) return;
 
-        this.notes[idx] = {
-            ...this.notes[idx],
-            title,
-            content
-        };
-
+        this.notes[index] = { ...this.notes[index], title, content };
         this.saveToStorage();
         this.render();
-        this.showToast("Note updated");
-    }
+        this.showToast("Updated");
+    };
 
-    deleteNote(id) {
-        const note = this.notes.find((n) => n.id === id);
+    deleteNote = id => {
+        const note = this.notes.find(n => n.id === id);
         if (!note || note.status === "deleted") return;
 
         note.status = "deleted";
         this.saveToStorage();
         this.render();
-        this.showToast("Note moved to trash");
-    }
+        this.showToast("Moved to trash");
+    };
 
-    archiveNote(id) {
-        const note = this.notes.find((n) => n.id === id);
+    archiveNote = id => {
+        const note = this.notes.find(n => n.id === id);
         if (!note || note.status === "deleted") return;
 
-        if (note.status === "archived") {
-            note.status = "active";
-            this.showToast("Note unarchived");
-        } else {
-            note.status = "archived";
-            this.showToast("Note archived");
-        }
-
+        note.status = note.status === "archived" ? "active" : "archived";
         this.saveToStorage();
         this.render();
-    }
+        this.showToast(note.status === "archived" ? "Archived" : "Unarchived");
+    };
 
-    restoreNote(id) {
-        const note = this.notes.find((n) => n.id === id);
+    restoreNote = id => {
+        const note = this.notes.find(n => n.id === id);
         if (!note || note.status !== "deleted") return;
 
         note.status = "active";
         this.saveToStorage();
         this.render();
-        this.showToast("Note restored");
-    }
+        this.showToast("Restored");
+    };
 
-    getFilteredNotes(searchTerm) {
-        const term = (searchTerm || "").toLowerCase();
+    getFilteredNotes = (term = "") =>
+        this.notes.filter(({ title, content, status }) =>
+            (this.currentFilter === "all" || status === this.currentFilter) &&
+            (title.toLowerCase().includes(term) || content.toLowerCase().includes(term))
+        );
 
-        return this.notes.filter((note) => {
-            // filter by status
-            let statusMatch = true;
-            if (this.currentFilter !== "all") {
-                statusMatch = note.status === this.currentFilter;
-            }
-
-            // filter by search
-            let searchMatch = true;
-            if (term) {
-                const inTitle = note.title.toLowerCase().includes(term);
-                const inContent = note.content.toLowerCase().includes(term);
-                searchMatch = inTitle || inContent;
-            }
-
-            return statusMatch && searchMatch;
-        });
-    }
-
-    // 🔹 UPDATED: keep Lottie, only update text/icon
-    render(searchTerm) {
+    render = searchTerm => {
         if (!this.gridEl || !this.emptyEl) return;
 
         const list = this.getFilteredNotes(searchTerm);
@@ -264,180 +181,74 @@ class NotesApp {
         if (!list.length) {
             this.gridEl.classList.add("hidden");
             this.emptyEl.classList.remove("hidden");
-
-            // DO NOT touch emptyEl.innerHTML → preserves <dotlottie-player>
             this.updateEmptyStateContent();
             return;
         }
 
-        this.gridEl.classList.remove("hidden");
         this.emptyEl.classList.add("hidden");
+        this.gridEl.classList.remove("hidden");
 
-        list.forEach((note) => {
-            const card = this.createCard(note);
-            this.gridEl.appendChild(card);
-        });
-    }
-
-    createCard(note) {
-        const div = document.createElement("div");
-        div.className = "note-card " + note.status;
-
-        div.innerHTML = `
-            <div class="note-header">
-                <h3 class="note-title">${this.escapeHtml(note.title)}</h3>
-                <div class="note-date">
-                    <i class="fas fa-calendar"></i>
-                    ${this.formatDate(note.createdAt)}
-                </div>
-            </div>
-            <div class="note-content">
-                ${this.escapeHtml(note.content)}
-            </div>
-            <div class="note-actions">
-                ${this.getActionsMarkup(note)}
-            </div>
-        `;
-
-        return div;
-    }
-
-    getActionsMarkup(note) {
-        if (note.status === "deleted") {
-            return `
-                <button class="action-btn restore-btn" onclick="notesApp.restoreNote('${note.id}')">
-                    <i class="fas fa-undo"></i>
-                    Restore
-                </button>
-            `;
-        }
-
-        const isArchived = note.status === "archived";
-        const archiveIcon = isArchived ? "fa-solid fa-box-open" : "fa-solid fa-archive";
-        const archiveText = isArchived ? "Unarchive" : "Archive";
-
-        return `
-            <button class="action-btn edit-btn" onclick="notesApp.openModal('${note.id}')">
-                <i class="fas fa-pen"></i>
-                Edit
-            </button>
-            <button class="action-btn archive-btn" onclick="notesApp.archiveNote('${note.id}')">
-                <i class="${archiveIcon}"></i>
-                ${archiveText}
-            </button>
-            <button class="action-btn delete-btn" onclick="notesApp.deleteNote('${note.id}')">
-                <i class="fas fa-trash"></i>
-                Delete
-            </button>
-        `;
-    }
-
- getEmptyStateConfig() {
-    const config = {
-        active: {
-            title: "No active notes",
-            text: "Create a new note to get started."
-        },
-        archived: {
-            title: "No archived notes",
-            text: "Archive a note to see it here."
-        },
-        deleted: {
-            title: "No deleted notes",
-            text: "Deleted notes will appear here."
-        },
-        all: {
-            title: "No notes found",
-            text: "Try changing filters or create a new note."
-        }
+        list.forEach(note => this.gridEl.appendChild(this.createCard(note)));
     };
 
-    return config[this.currentFilter] || config.all;
-}
+    createCard = note => {
+        const { id, title, content, status, createdAt } = note;
+        const card = document.createElement("div");
+        card.className = `note-card ${status}`;
 
+        card.innerHTML = `
+        <div class="note-header">
+            <h3>${this.escapeHtml(title)}</h3>
+            <span>${this.formatDate(createdAt)}</span>
+        </div>
+        <p>${this.escapeHtml(content)}</p>
+        <div class="note-actions">
+            ${this.getActionsMarkup(note)}
+        </div>`;
 
-  updateEmptyStateContent() {
-    const state = this.getEmptyStateConfig();
+        return card;
+    };
 
-    const titleEl = document.getElementById("emptyStateTitle");
-    const textEl = document.getElementById("emptyStateText");
+     getActionsMarkup = ({ id, status }) => {
+        if (status === "deleted")
+            return `<button onclick="notesApp.restoreNote('${id}')">Restore</button>`;
 
-    if (!titleEl || !textEl) return;
+        const isArchived = status === "archived";
+        return `
+            <button onclick="notesApp.openModal('${id}')">Edit</button>
+            <button onclick="notesApp.archiveNote('${id}')">${isArchived ? "Unarchive" : "Archive"}</button>
+            <button onclick="notesApp.deleteNote('${id}')">Delete</button>`;
+    };
 
-    titleEl.textContent = state.title;
-    textEl.textContent = state.text;
-}
+    getEmptyStateConfig = () => ({
+        active: ["No notes yet", "Create one to get started"],
+        archived: ["Nothing archived", "Archive notes to store them"],
+        deleted: ["Trash is empty", "Deleted notes go here"],
+        all: ["No notes", "Try adding or changing filter"]
+    })[this.currentFilter];
 
-    formatDate(isoString) {
-        if (!isoString) return "";
+    updateEmptyStateContent = () => {
+        const [title, text] = this.getEmptyStateConfig();
+        document.getElementById("emptyStateTitle").textContent = title;
+        document.getElementById("emptyStateText").textContent = text;
+    };
 
-        const date = new Date(isoString);
-        const now = new Date();
-        const diffMs = now - date;
+    formatDate = iso =>
+        new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-        if (isNaN(diffMs)) {
-            return date.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric"
-            });
-        }
+    escapeHtml = str => new Option(str).innerHTML;
 
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 0) {
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-            if (diffHours <= 0) {
-                const diffMins = Math.floor(diffMs / (1000 * 60));
-                if (diffMins <= 1) return "Just now";
-                return diffMins + " minutes ago";
-            }
-            return diffHours === 1 ? "1 hour ago" : diffHours + "hours ago";
-        }
-
-        if (diffDays === 1) return "Yesterday";
-        if (diffDays < 7) return diffDays + " days ago";
-
-        return date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric"
-        });
-    }
-
-    escapeHtml(str) {
-        const div = document.createElement("div");
-        div.textContent = str;
-        return div.innerHTML;
-    }
-
-    showToast(message, type) {
-        if (!this.toastEl || !this.toastMsgEl) return;
-
-        this.toastMsgEl.textContent = message || "";
-        // type can be "success" or "error" etc.
-        this.toastEl.className = "toast " + (type || "success");
+    showToast = (msg, type = "success") => {
+        this.toastMsgEl.textContent = msg;
+        this.toastEl.className = `toast ${type}`;
         this.toastEl.classList.remove("hidden");
-
-        setTimeout(() => {
-            this.toastEl.classList.add("hidden");
-        }, 3000);
-    }
+        setTimeout(() => this.toastEl.classList.add("hidden"), 2500);
+    };
 }
 
-// expose single instance globally so inline onclick works
 window.notesApp = new NotesApp();
 
-// theme toggle
-const themeToggle = document.getElementById("themeToggle");
-const bodyEl = document.body;
-
-if (bodyEl && themeToggle) {
-    bodyEl.classList.add("light-mode");
-
-    themeToggle.addEventListener("click", () => {
-        bodyEl.classList.toggle("dark-mode");
-        bodyEl.classList.toggle("light-mode");
-        themeToggle.classList.toggle("active");
-    });
-}
+document.getElementById("themeToggle")?.addEventListener("click", e => {
+    document.body.classList.toggle("dark-mode");
+    e.currentTarget.classList.toggle("active");
+});

@@ -1,11 +1,12 @@
-/* Reset */
+
+
 * {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 }
 
-/* Theme */
+
 body {
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 	transition: background 0.3s ease, color 0.3s ease;
@@ -22,7 +23,7 @@ body.light-mode {
 	color: #1a2332;
 }
 
-/* Navbar */
+
 nav {
 	display: flex;
 	justify-content: space-between;
@@ -86,7 +87,7 @@ nav {
 	gap: 1rem;
 }
 
-/* Theme Toggle */
+
 .theme-toggle {
 	width: 50px;
 	height: 26px;
@@ -123,7 +124,7 @@ nav {
 	transform: translateX(24px);
 }
 
-/* Buttons */
+
 .btn {
 	padding: .6rem 1.5rem;
 	border-radius: 8px;
@@ -157,7 +158,7 @@ nav {
 	box-shadow: 0 8px 20px rgba(167,139,250,0.4);
 }
 
-/* Hero */
+
 .hero {
 	display: flex;
 	justify-content: center;
@@ -194,7 +195,7 @@ nav {
 	gap: 1.5rem;
 }
 
-/* Floating Background cubes */
+/* updated : Floating Background cubes */
 .hero-bg {
 	position: absolute;
 	inset: 0;
@@ -244,7 +245,7 @@ nav {
 	50%     { opacity: 1; transform: scale(1.05); }
 }
 
-/* Grid Background */
+
 .grid-bg {
 	position: fixed;
 	inset: 0;
@@ -255,7 +256,7 @@ nav {
 	z-index: -1;
 }
 
-/* Services Section */
+
 .services-section {
 	max-width: 1200px;
 	margin: auto;
@@ -274,7 +275,7 @@ nav {
 	margin-bottom: .5rem;
 }
 
-/* App Cards */
+
 .app-section {
 	display: flex;
 	justify-content: center;
@@ -344,7 +345,7 @@ body.dark-mode .app-card {
 	box-shadow: 0 14px 32px rgba(167,139,250,0.8);
 }
 
-/* Footer */
+
 .site-footer {
 	margin-top: 2rem;
 	padding: 1.5rem 4rem;
@@ -380,7 +381,6 @@ body.dark-mode .app-card {
 	opacity: 1;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
 	nav { padding: 1.5rem 2rem; }
 	.hero { flex-direction: column; text-align: center; padding: 3rem 2rem; }
