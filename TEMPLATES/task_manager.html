@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+     <link rel="stylesheet" href="../CSS/TaskManger.css"/>
+   
+</head>
+<body class="dark-mode">
+    <div class="grid-bg"></div>
+    
+    <nav>
+        <div class="logo">
+            <div class="logo-icon">✓</div>
+            <span>TaskFlow</span>
+        </div>
+        <div class="theme-toggle" id="themeToggle">
+            <div class="theme-toggle-slider"></div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Task Manager</h1>
+            <p>Organize your work and boost your productivity</p>
+        </div>
+
+        <!-- <div class="add-task-section">
+            <div class="input-group">
+                <input type="text" id="taskTitle" placeholder="Task title..." maxlength="100">
+                <textarea id="taskDescription" placeholder="Task description..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-primary" id="addTaskBtn">Add Task</button>
+                <button class="btn btn-secondary" id="cancelEditBtn" style="display: none;">Cancel Edit</button>
+            </div>
+        </div> -->
+
+        
+
+    <!-- 3/4 LEFT : Add Task Section -->
+    <div class="add-task-section">
+        <div class="input-group">
+            <input type="text" id="taskTitle" placeholder="Task title..." maxlength="100">
+            <textarea id="taskDescription" placeholder="Task description..."></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-primary" id="addTaskBtn">Add Task</button>
+            <button class="btn btn-secondary" id="cancelEditBtn" style="display: none;">Cancel Edit</button>
+        </div>
+    </div>
+
+
+
+    
+
+        
+        
+        <div class="filters">
+            <button class="filter-btn active" data-filter="in-progress">In Progress</button>
+            <button class="filter-btn" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+            <button class="filter-btn" data-filter="deleted">Deleted</button>
+        </div>
+
+        <div class="tasks-grid" id="tasksGrid"></div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">📋</div>
+            <h3>No tasks found</h3>
+            <p>Create your first task to get started</p>
+        </div>
+    </div>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Task</h2>
+                <button class="close-btn" id="closeModal">×</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="editTaskTitle" placeholder="Task title..." maxlength="100">
+                <textarea id="editTaskDescription" placeholder="Task description..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelModal">Cancel</button>
+                <button class="btn btn-primary" id="saveEditBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    
+
+<script src="../JS/Taskmanager.js" defer></script>
+
+</body>
+</html>
+
+
