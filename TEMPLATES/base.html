@@ -5,28 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FocusPanel</title>
     <link rel="stylesheet" href="../CSS/base.css">
-
-
-   
-   
 </head>
 <body class="dark-mode">
     <div class="grid-bg"></div>
     
     <nav>
-
         <div class="part">
-        <div class="logo">
-            <div class="logo-icon">⚡</div>
-            <span>FocusPanel</span>
-        </div>
-        
-        <ul class="nav-links">
-            <li><a href="#product">Home</a></li>
-            <li><a href="#pricing">Services</a></li>
-            <li><a href="#company">About</a></li>
-            <li><a href="#help">Help</a></li>
-        </ul>
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                <span>FocusPanel</span>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="#product">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#company">About</a></li>
+                <li><a href="#help">Help</a></li>
+            </ul>
         </div>
         
         <div class="nav-actions">
@@ -38,22 +33,10 @@
         </div>
     </nav>
 
-    <main class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Focus Panel<br>Track Things</h1>
-            <p class="hero-subtitle">
-              FocusPanel helps teams organize tasks, track progress, and collaborate seamlessly.Stay focused with a clean, intuitive workflow dashboard.
-Boost productivity and complete projects on time — every time.
-            </p>
-            <div class="hero-actions">
-                <a href="#start" class="btn btn-primary">Start now</a>
-                <a href="#demo" class="btn btn-demo">Watch demo</a>
-            </div>
-        </div>
-
-        <div class="hero-visual">
-            <div class="cube-container">
-                <div class="cube-grid">
+    <main id="product" class="hero">
+             <div class="hero-bg">
+        <div class="cube-container">
+            <div class="cube-grid">
                     <div class="cube"></div>
                     <div class="cube"></div>
                     <div class="cube"></div>
@@ -66,13 +49,71 @@ Boost productivity and complete projects on time — every time.
                 </div>
             </div>
         </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Focus Panel<br>Track Things</h1>
+            <p class="hero-subtitle">
+                FocusPanel helps teams organize tasks, track progress, and collaborate seamlessly.
+                Stay focused with a clean, intuitive workflow dashboard. Boost productivity and complete
+                projects on time — every time.
+            </p>
+            <div class="hero-actions">
+                <a href="#start" class="btn btn-primary">Start now</a>
+                <a href="#services" class="btn btn-demo">Watch demo</a>
+            </div>
+        </div>
+
+ 
+
+
+        <section id="services" class="services-section">
+
+    <div class="services-header">
+        <h2>What We Offer</h2>
+        <p>
+            FocusPanel brings productivity tools together in one clean dashboard.
+            Select an application below and start organizing your workflow with ease.
+        </p>
+    </div>
+
+    <div class="app-section">
+          <div class="app-card">
+            <img src="../assets/animations/NoteLogo.png" alt="Notes App" class="app-img">
+            <h3 class="app-title">Notes App</h3>
+            <p class="app-desc">Write, save and organize your ideas instantly.</p>
+            <a href="notes_app.html" class="btn app-btn">Open Notes App</a>
+        </div>
+        <div class="app-card">
+            <img src="../assets/animations/task.jpg" alt="Task Manager" class="app-img">
+            <h3 class="app-title">Task Manager</h3>
+            <p class="app-desc">Plan, organize and track your daily tasks effortlessly.</p>
+            <a href="task_app.html" class="btn app-btn">Open Task Manager</a>
+        </div>
+
+      
+    </div>
+</section>
     </main>
+
+
+
+
+   
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p>© 2025 FocusPanel. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#company">About</a>
+                <a href="#help">Help</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </footer>
 
     <script>
         const themeToggle = document.getElementById('themeToggle');
         const body = document.body;
 
-        themeToggle.addEventListener('click', function() {
+        themeToggle.addEventListener('click', function () {
             if (body.classList.contains('dark-mode')) {
                 body.classList.remove('dark-mode');
                 body.classList.add('light-mode');
