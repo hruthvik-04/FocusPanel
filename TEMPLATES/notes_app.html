@@ -1,30 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    
-    <title>Notes App | Radware - Task 1</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="../CSS/StyleNote.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <title>Notes App | Radware - Task 1</title>
 
+
+  <link rel="stylesheet" href="../CSS/Note/StyleNote.css"/>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+
+
+  <script
+    type="module"
+    src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.js">
+  </script>
 </head>
+
+
 <body>
 
-    <div class="container">
+        <div class="container">
+            <div class="top-bar">
+        <div class="top-logo">
+            <i class="fas fa-sticky-note"></i>
+            <span>FocuZ Note</span>
+        </div>
 
-        <!-- App Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1 class="app-title">
-                    <i class="fas fa-sticky-note"></i>
-                    FocuZ Note
-                </h1>
-                <p class="app-subtitle">A simple and organized way to keep your notes and be in track </p>
-            </div>
-        </header>
+        <div class="theme-toggle" id="themeToggle">
+            <div class="theme-toggle-slider"></div>
+        </div>
+    </div>
+     <header class="header">
+    <div class="header-content">
+
+       
+
+        <h1 class="app-title">
+            <i class="fas fa-sticky-note"></i>
+            FocuZ Note
+        </h1>
+
+        <p class="app-subtitle">A simple and organized way to keep your notes and be in track</p>
+    </div>
+</header>
+
 
         <!-- Controls for Search, Filters, Add Button -->
         <section class="controls-section">
@@ -137,9 +158,11 @@
         <span id="toastMessage">Saved</span>
     </div>
 
-    <script src="../JS/ScriptNote.js" defer></script>
+<script src="../JS/ScriptNote.js" defer></script>
+
+
+  
+
 
 </body>
-
- 
 </html>
