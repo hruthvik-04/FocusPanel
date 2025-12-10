@@ -208,17 +208,44 @@ class NotesApp {
 
         return card;
     };
-
-     getActionsMarkup = ({ id, status }) => {
-        if (status === "deleted")
-            return `<button onclick="notesApp.restoreNote('${id}')">Restore</button>`;
-
-        const isArchived = status === "archived";
+getActionsMarkup = ({ id, status }) => {
+    if (status === "deleted") {
         return `
-            <button onclick="notesApp.openModal('${id}')">Edit</button>
-            <button onclick="notesApp.archiveNote('${id}')">${isArchived ? "Unarchive" : "Archive"}</button>
-            <button onclick="notesApp.deleteNote('${id}')">Delete</button>`;
-    };
+            <button 
+                class="action-btn btn-restore" 
+                onclick="notesApp.restoreNote('${id}')"
+            >
+                Restore
+            </button>
+        `;
+    }
+
+    const isArchived = status === "archived";
+
+    return `
+        <button 
+            class="action-btn btn-edit" 
+            onclick="notesApp.openModal('${id}')"
+        >
+            Edit
+        </button>
+
+        <button 
+            class="action-btn btn-archive" 
+            onclick="notesApp.archiveNote('${id}')"
+        >
+            ${isArchived ? "Unarchive" : "Archive"}
+        </button>
+
+        <button 
+            class="action-btn btn-delete" 
+            onclick="notesApp.deleteNote('${id}')"
+        >
+            Delete
+        </button>
+    `;
+};
+
 
     getEmptyStateConfig = () => ({
         active: ["No notes yet", "Create one to get started"],
